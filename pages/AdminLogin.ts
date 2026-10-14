@@ -6,6 +6,7 @@ export class AdminLoginPage {
   readonly password: Locator;
   readonly loginButton: Locator;
   readonly logout: Locator;
+  readonly error: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -13,6 +14,7 @@ export class AdminLoginPage {
     this.password = page.locator('#password');
     this.loginButton = page.locator('#doLogin');
     this.logout = page.getByText('Logout');
+    this.error = page.getByRole('alert');
   }
 
   async goto() {
@@ -36,5 +38,9 @@ export class AdminLoginPage {
   async expectLoggedOut() {
     await expect(this.loginButton).toBeVisible();
     await expect(this.logout).toBeHidden();
+  }
+
+  async expectLoginError(message: string | RegExp) {
+    await expect(this.error).toContainText(message);
   }
 }
