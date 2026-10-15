@@ -14,7 +14,7 @@ export class AdminLoginPage {
     this.password = page.locator('#password');
     this.loginButton = page.locator('#doLogin');
     this.logout = page.getByText('Logout');
-    this.error = page.getByRole('alert');
+    this.error = page.locator('.alert-danger');
   }
 
   async goto() {
@@ -31,13 +31,18 @@ export class AdminLoginPage {
     await this.logout.click();
   }
 
-  async expectLoggedIn() {
+    async expectLoggedIn() {
+    await expect(this.page).toHaveURL(/\/admin\/rooms/);
     await expect(this.logout).toBeVisible();
   }
 
-  async expectLoggedOut() {
+  async expectLoginForm() {
     await expect(this.loginButton).toBeVisible();
-    await expect(this.logout).toBeHidden();
+    await expect(this.page).not.toHaveURL(/\/admin\/rooms/);
+  }
+
+  async expectOnHomepage() {
+    await expect(this.page).toHaveURL(/automationintesting\.online\/$/);
   }
 
   async expectLoginError(message: string | RegExp) {
