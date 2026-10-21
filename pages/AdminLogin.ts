@@ -6,6 +6,7 @@ export class AdminLoginPage {
   readonly password: Locator;
   readonly loginButton: Locator;
   readonly logout: Locator;
+  readonly roomsPageReady: Locator;
   readonly error: Locator;
 
   constructor(page: Page) {
@@ -14,6 +15,7 @@ export class AdminLoginPage {
     this.password = page.locator('#password');
     this.loginButton = page.locator('#doLogin');
     this.logout = page.getByText('Logout');
+    this.roomsPageReady = page.locator('#createRoom');
     this.error = page.locator('.alert-danger');
   }
 
@@ -33,6 +35,7 @@ export class AdminLoginPage {
 
     async expectLoggedIn() {
     await expect(this.page).toHaveURL(/\/admin\/rooms/);
+    await expect(this.roomsPageReady).toBeVisible();
     await expect(this.logout).toBeVisible();
   }
 
