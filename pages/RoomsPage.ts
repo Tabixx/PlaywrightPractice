@@ -1,5 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { RoomData } from '../data/roomData';
+import { RoomData, Feature } from '../data/roomData';
 
 export class RoomsPage {
     readonly page: Page;
@@ -8,7 +8,6 @@ export class RoomsPage {
     readonly accessible: Locator;
     readonly price: Locator;
     readonly createButton: Locator;
-    readonly errors: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -17,7 +16,6 @@ export class RoomsPage {
         this.accessible = page.locator('#accessible'); 
         this.price = page.locator('#roomPrice');
         this.createButton = page.locator('#createRoom');
-        this.errors = page.locator('.alert-danger');
     }
 
     async goto() {
@@ -29,23 +27,39 @@ export class RoomsPage {
         return this.page.getByText(name, { exact: true });
     }
 
+    roomRow(name: string): Locator {
+        return this.page.getByTestId('roomlisting').filter({ hasText: name });
+    }
+
     async createRoom(room: RoomData) {
         await this.name.fill(room.name);
         await this.type.selectOption(room.type);
         await this.accessible.selectOption(room.accessible);
         await this.price.fill(room.price);
+        for (const feature of room.features) {
+            await this.page.getByRole('checkbox', { name: feature, exact: true }).check();}
         await this.createButton.click();
     }
   
-    //deletion??
-
-    async expectRoomListed(name: string) {
-        await expect(this.roomListing(name)).toBeVisible();
+    async deleteRoom(name: string) {
+        await this.roomRow(name).locator('.roomDelete').click(); 
     }
 
-    async expectRoomNotListed(name: string) {
-        await expect(this.roomListing(name)).toBeHidden();
-    }
+    async expectError(message: string | RegExp) {
+    await expect(this.page.getByText(message)).toBeVisible();
+  }
 
-    
+  async expectRoomListed(name: string) {
+    await expect(this.roomListing(name)).toBeVisible();
+  }
+
+  async expectRoomNotListed(name: string) {
+    await expect(this.roomListing(name)).toBeHidden();
+  }
+
+  async expectRoomFeatures(name: string, expected: Feature[]) {
+    for (const feature of expected) {
+      await expect(this.roomRow(name)).toContainText(feature);
+    }
+  }
 }

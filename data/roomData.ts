@@ -6,6 +6,7 @@ export type RoomData = {
   type: 'Single' | 'Twin' | 'Double' | 'Family' | 'Suite';
   accessible: 'true' | 'false';
   price: string;
+  features: Feature[];
 };
 
 export function newRoom(overrides: Partial<RoomData> = {}): RoomData {
@@ -15,6 +16,7 @@ export function newRoom(overrides: Partial<RoomData> = {}): RoomData {
     type: 'Double',
     accessible: 'false',
     price: '150',
+    features: [],
     ...overrides,
   };
 }
