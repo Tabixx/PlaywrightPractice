@@ -1,5 +1,6 @@
-import { test, expect } from '../fixtures';
-import { newRoom } from '../data/roomData';
+import { test } from '../fixtures';
+import { newRoom, features } from '../data/roomData';
+import { errors } from '../data/errorMessages';
 
 test.use({ storageState: '.auth/admin.json' });
 
@@ -10,18 +11,81 @@ test.describe('Admin rooms', () => {
         await roomsPage.expectRoomListed(room.name);
     });
 
-// test('Deleted room disappears from the list', async ({ roomsPage }) => {
-//     const room = newRoom();
-//     await roomsPage.createRoom(room);
-//     await roomsPage.expectRoomListed(room.name);
-//     await roomsPage.deleteRoom(room.name);
-//     await roomsPage.expectRoomNotListed(room.name);
-// });
+test.describe('Room Types', () => {
+    for (const type of ['Single', 'Twin', 'Double', 'Family', 'Suite'] as const) {
+        test(`can create a ${type} room`, async ({ roomsPage }) => {
+            const room = newRoom({ type });
+            await roomsPage.createRoom(room);
+            await roomsPage.expectRoomListed(room.name); 
+        });
+    }
+});
 
-    test('Empty form shows validation errors', async ({ roomsPage }) => {
-        await roomsPage.createButton.click();
-        await expect(roomsPage.errors).toBeVisible();
+test.describe('features', () => {
+    for (const feature of features) {
+        test(`Room with ${feature}`, async ({ roomsPage }) => {
+            const room = newRoom({ features: [feature] });
+            await roomsPage.createRoom(room);
+            await roomsPage.expectRoomListed(room.name);
+            await roomsPage.expectRoomFeatures(room.name, [feature]);
+        });
+    }
+        test('Room with all features', async ({ roomsPage }) => {
+            const room = newRoom({ features: [...features] });
+            await roomsPage.createRoom(room);
+            await roomsPage.expectRoomListed(room.name);
+            await roomsPage.expectRoomFeatures(room.name, [...features]);
+        });
+});
+
+test.describe('Rejected input', () => {
+    test('No name', async ({ roomsPage }) => {
+      await roomsPage.createRoom(newRoom({ name: '' }));
+      await roomsPage.expectError(errors.room.nameBlank);
     });
-})
 
-// continue here 
+    test('No price', async ({ roomsPage }) => {
+      const room = newRoom({ price: '' });
+      await roomsPage.createRoom(room);
+      await roomsPage.expectError(errors.room.priceBlank);
+      await roomsPage.expectRoomNotListed(room.name);
+    });
+
+    test('No name and no price', async ({ roomsPage }) => {
+      await roomsPage.createRoom(newRoom({ name: '', price: '' }));
+      await roomsPage.expectError(errors.room.priceBlank);
+    });
+  });
+
+  test.describe('Deleting', () => {
+    test('Deleted room disappears from the list', async ({ roomsPage }) => {
+      const room = newRoom();
+      await roomsPage.createRoom(room);
+      await roomsPage.expectRoomListed(room.name);
+
+      await roomsPage.deleteRoom(room.name);
+      await roomsPage.expectRoomNotListed(room.name);
+    });
+
+    test('Deletion persists after reloading the page', async ({ roomsPage }) => {
+      const room = newRoom();
+      await roomsPage.createRoom(room);
+      await roomsPage.expectRoomListed(room.name);
+
+      await roomsPage.deleteRoom(room.name);
+      await roomsPage.goto();
+      await roomsPage.expectRoomNotListed(room.name);
+    });
+
+    test('Deleting one room leaves another untouched', async ({ roomsPage }) => {
+      const kept = newRoom();
+      const removed = newRoom();
+      await roomsPage.createRoom(kept);
+      await roomsPage.createRoom(removed);
+
+      await roomsPage.deleteRoom(removed.name);
+      await roomsPage.expectRoomNotListed(removed.name);
+      await roomsPage.expectRoomListed(kept.name);
+    });
+  });
+});
