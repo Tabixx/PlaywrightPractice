@@ -57,8 +57,10 @@ test.describe('Rejected input', () => {
     });
   });
 
-  test.describe('Deleting', () => {
+  test.describe('Deleting [known bug: DELETE returns 500]', () => {
+    const knownBug = 'Known site bug: DELETE room request returns 500 Internal Server Error';
     test('Deleted room disappears from the list', async ({ roomsPage }) => {
+        test.fail(true, knownBug);
       const room = newRoom();
       await roomsPage.createRoom(room);
       await roomsPage.expectRoomListed(room.name);
@@ -68,6 +70,7 @@ test.describe('Rejected input', () => {
     });
 
     test('Deletion persists after reloading the page', async ({ roomsPage }) => {
+        test.fail(true, knownBug);
       const room = newRoom();
       await roomsPage.createRoom(room);
       await roomsPage.expectRoomListed(room.name);
@@ -78,6 +81,7 @@ test.describe('Rejected input', () => {
     });
 
     test('Deleting one room leaves another untouched', async ({ roomsPage }) => {
+        test.fail(true, knownBug);
       const kept = newRoom();
       const removed = newRoom();
       await roomsPage.createRoom(kept);

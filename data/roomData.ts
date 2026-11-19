@@ -12,7 +12,7 @@ export type RoomData = {
 export function newRoom(overrides: Partial<RoomData> = {}): RoomData {
   const suffix = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
   return {
-    name: `QA${suffix}`,
+    name: `TabiQA${suffix}`,
     type: 'Double',
     accessible: 'false',
     price: '150',
