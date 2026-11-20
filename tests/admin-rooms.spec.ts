@@ -1,4 +1,4 @@
-import { test } from '../fixtures';
+import { test, expect } from '../fixtures';
 import { newRoom, features } from '../data/roomData';
 import { errors } from '../data/errorMessages';
 
@@ -10,6 +10,8 @@ test.describe('Admin rooms', () => {
         await roomsPage.createRoom(room);
         await roomsPage.expectRoomListed(room.name);
     });
+
+    
 
 test.describe('Room Types', () => {
     for (const type of ['Single', 'Twin', 'Double', 'Family', 'Suite'] as const) {
@@ -55,6 +57,20 @@ test.describe('Rejected input', () => {
       await roomsPage.createRoom(newRoom({ name: '', price: '' }));
       await roomsPage.expectError(errors.room.priceBlank);
     });
+
+    test('Long room name stays inside its column', async ({ roomsPage }) => {
+        test.fail(true, 'Known issue: long room names overflow into the Type column');
+
+    const room = newRoom({ name: `${newRoom().name}-longnametest111122223333` });
+    await roomsPage.createRoom(room);
+    await roomsPage.expectRoomListed(room.name);
+
+    const overflows = await roomsPage
+      .roomListing(room.name)
+      .evaluate((el) => el.scrollWidth > el.clientWidth);
+    expect(overflows).toBe(false);
+  });
+
   });
 
   test.describe('Deleting [known bug: DELETE returns 500]', () => {
@@ -84,7 +100,7 @@ test.describe('Rejected input', () => {
         test.fail(true, knownBug);
       const kept = newRoom();
       const removed = newRoom();
-      
+
       await roomsPage.createRoom(kept);
       await roomsPage.expectRoomListed(kept.name);
       await roomsPage.createRoom(removed);
