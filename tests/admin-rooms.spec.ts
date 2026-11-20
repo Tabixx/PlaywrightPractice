@@ -84,8 +84,11 @@ test.describe('Rejected input', () => {
         test.fail(true, knownBug);
       const kept = newRoom();
       const removed = newRoom();
+      
       await roomsPage.createRoom(kept);
+      await roomsPage.expectRoomListed(kept.name);
       await roomsPage.createRoom(removed);
+      await roomsPage.expectRoomListed(removed.name);
 
       await roomsPage.deleteRoom(removed.name);
       await roomsPage.expectRoomNotListed(removed.name);
