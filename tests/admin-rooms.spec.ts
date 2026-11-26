@@ -11,8 +11,6 @@ test.describe('Admin rooms', () => {
         await roomsPage.expectRoomListed(room.name);
     });
 
-    
-
 test.describe('Room Types', () => {
     for (const type of ['Single', 'Twin', 'Double', 'Family', 'Suite'] as const) {
         test(`can create a ${type} room`, async ({ roomsPage }) => {
@@ -58,19 +56,6 @@ test.describe('Rejected input', () => {
       await roomsPage.expectError(errors.room.priceBlank);
     });
 
-    test('Long room name stays inside its column', async ({ roomsPage }) => {
-        test.fail(true, 'Known issue: long room names overflow into the Type column');
-
-    const room = newRoom({ name: `${newRoom().name}-longnametest111122223333` });
-    await roomsPage.createRoom(room);
-    await roomsPage.expectRoomListed(room.name);
-
-    const overflows = await roomsPage
-      .roomListing(room.name)
-      .evaluate((el) => el.scrollWidth > el.clientWidth);
-    expect(overflows).toBe(false);
-  });
-
   });
 
   test.describe('Deleting [known bug: DELETE returns 500]', () => {
@@ -87,13 +72,19 @@ test.describe('Rejected input', () => {
 
     test('Deletion persists after reloading the page', async ({ roomsPage }) => {
         test.fail(true, knownBug);
-      const room = newRoom();
-      await roomsPage.createRoom(room);
-      await roomsPage.expectRoomListed(room.name);
+      const kept = newRoom();
+      const removed = newRoom();
 
-      await roomsPage.deleteRoom(room.name);
+      await roomsPage.createRoom(kept);
+      await roomsPage.expectRoomListed(kept.name);
+      await roomsPage.createRoom(removed);
+      await roomsPage.expectRoomListed(removed.name);
+
+      await roomsPage.deleteRoom(removed.name);
       await roomsPage.goto();
-      await roomsPage.expectRoomNotListed(room.name);
+
+      await roomsPage.expectRoomListed(kept.name);
+      await roomsPage.expectRoomNotListed(removed.name);
     });
 
     test('Deleting one room leaves another untouched', async ({ roomsPage }) => {

@@ -2,11 +2,13 @@ import { test as base } from '@playwright/test';
 import { ContactForm } from '../pages/ContactForm';
 import { AdminLoginPage } from '../pages/AdminLogin';
 import { RoomsPage } from '../pages/RoomsPage';
+import { RoomsApi } from '../api/RoomsApi';
 
 type Pages = {
   contactForm: ContactForm;
   adminLogin: AdminLoginPage;
   roomsPage: RoomsPage;
+  roomsApi: RoomsApi;
 };
 
 export const test = base.extend<Pages>({
@@ -24,6 +26,10 @@ export const test = base.extend<Pages>({
     const roomsPage = new RoomsPage(page);
     await roomsPage.goto();
     await use(roomsPage);
+  },
+
+  roomsApi: async ({ request }, use) => {
+    await use (new RoomsApi(request));
   },
 });
 
